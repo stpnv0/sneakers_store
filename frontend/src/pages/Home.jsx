@@ -26,8 +26,9 @@ function Home({ items,
               <Card 
               key={index}
               title={item.title}
+              description={item.description}
               price={item.price}
-              imgUrl={item.imgUrl}
+              imgUrl={item.imageUrl}
               onFavourite={(obj) =>onAddToFavorite(obj)}
               onPlus={(obj) => onAddToCart(obj)}
               />

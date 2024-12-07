@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"sneakers-store/internal/sneakers"
 	"time"
 
@@ -20,16 +21,39 @@ func InitRouter(sneakerHandler *sneakers.Handler) {
 		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://localhost:5173"
-		},
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	// Настройка маршрутов
-	r.POST("/api/v1/sneakers", sneakerHandler.AddSneaker)           // Добавить кроссовки
-	r.GET("/api/v1/sneakers", sneakerHandler.GetAllSneakers)        // Получить список кроссовок
-	r.DELETE("//api/v1/sneakers/:id", sneakerHandler.DeleteSneaker) // Удалить кроссовок
+	api := r.Group("/api/v1")
+	{
+		// Настройка маршрутов
+		itemsGroup := api.Group("/items")
+		{
+			itemsGroup.POST("", sneakerHandler.AddSneaker)          // Добавить кроссовки
+			itemsGroup.GET("", sneakerHandler.GetAllSneakers)       // Получить список кроссовок
+			itemsGroup.DELETE("/:id", sneakerHandler.DeleteSneaker) // Удалить кроссовок
+		}
+
+		// заглушки для корзины
+		cartGroup := api.Group("/cart")
+		{
+			cartGroup.GET("", func(ctx *gin.Context) {
+				log.Println("GET /cart called")
+				ctx.JSON(200, gin.H{"message": "GET /cart not implemented yet"})
+			})
+			cartGroup.POST("", func(ctx *gin.Context) {
+				log.Println("POST /cart called")
+				ctx.JSON(200, gin.H{"message": "POST /cart not implemented yet"})
+			})
+			cartGroup.DELETE("/:id", func(ctx *gin.Context) {
+				log.Println("DELETE /cart/:id called")
+				ctx.JSON(200, gin.H{"message": "DELETE /cart not implemented yet"})
+			})
+		}
+
+	}
+
 }
 
 func Start(addr string) error {

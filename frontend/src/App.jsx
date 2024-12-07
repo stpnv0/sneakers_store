@@ -14,13 +14,27 @@ export const App = () => {
   const [cartOpened, setCartOpened] = useState(false);
 
   useEffect(() => {
-    axios.get('https://643ecf80c72fda4a0b01bac3.mockapi.io/items').then(res => {
-          setItems(res.data);
-        })
-    axios.get('https://643ecf80c72fda4a0b01bac3.mockapi.io/cart').then(res => {
-          setCartItems(res.data);
-        })
-  },[])
+    async function fetchData() {
+      try {
+        const itemsResponse = await fetch('http://localhost:8080/api/v1/items', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        const items = await itemsResponse.json();
+        setItems(items);
+        
+      } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+      }
+    }
+    
+    fetchData();
+  }, []);
+
   const onAddToCart = (obj) => {
     axios
       .post('https://643ecf80c72fda4a0b01bac3.mockapi.io/cart', obj)

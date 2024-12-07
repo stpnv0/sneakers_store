@@ -3,7 +3,7 @@
 import styles from "./styles.module.scss"
 import {useState} from 'react';
 
-export const Card = ({title, imgUrl,price, onPlus, onFavourite, favorited }) => {
+export const Card = ({title, description, imgUrl, price, onPlus, onFavourite, favorited }) => {
 
   const[isAdded, setIsAdded] = useState(false);
   const[isFavorite, setIsFavorite] = useState(favorited);
