@@ -5,6 +5,7 @@ import {Header} from './components/Header'
 import {Drawer} from './components/Drawer'
 import Home from './pages/Home'
 import Favorites from './pages/Favorites'
+import Login from './pages/Login'
 
 export const App = () => {
   const [items, setItems] = useState([]);
@@ -81,9 +82,12 @@ export const App = () => {
           <Favorites  
             items={favorites}
             onAddToFavorite={onAddToFavorite}
-            />
-        }
           />
+        }
+      />
+      <Route path="/login" 
+        element={<Login />} 
+      />
     </Routes>
   </div>
  
