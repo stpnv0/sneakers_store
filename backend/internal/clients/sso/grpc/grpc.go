@@ -61,12 +61,13 @@ func (c *Client) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	return resp.IsAdmin, nil
 }
 
-func (c *Client) Login(ctx context.Context, email string, password string) (string, error) {
+func (c *Client) Login(ctx context.Context, email string, password string, app_id int32) (string, error) {
 	const op = "grpc.Login"
 
 	resp, err := c.api.Login(ctx, &ssov1.LoginRequest{
 		Email:    email,
 		Password: password,
+		AppId:    app_id,
 	})
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", op, err)

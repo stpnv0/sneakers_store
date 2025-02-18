@@ -23,7 +23,7 @@ func main() {
 
 	database, err := db.ConnectDB(cfg)
 	if err != nil {
-		log.Error("[ERROR] can't connect to database: %s", err)
+		log.Error("[ERROR] can't connect to database", sl.Err(err))
 	}
 	defer database.Close()
 
@@ -50,7 +50,7 @@ func main() {
 	// Настройка роутера и запуск сервера
 	router.InitRouter(sneakerHandler, authHandler)
 	if err := router.Start("0.0.0.0:8080"); err != nil {
-		log.Error("[ERROR] failed to start server: %s", err)
+		log.Error("[ERROR] failed to start server", sl.Err(err))
 	}
 }
 

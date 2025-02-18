@@ -120,6 +120,12 @@ li {
   
 }
 
+.reg_vhod {
+  display: flex;
+  cursor: pointer;
+  padding: 13px;
+}
+
 .overlay {
   position: fixed;
   left: 0;

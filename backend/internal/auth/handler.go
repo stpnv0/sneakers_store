@@ -23,6 +23,7 @@ func New(ssoClient *grpc.Client, log *slog.Logger) *Handler {
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	AppId    int32  `json:"app_id"`
 }
 
 type RegisterRequest struct {
@@ -37,7 +38,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.ssoClient.Login(r.Context(), req.Email, req.Password)
+	token, err := h.ssoClient.Login(r.Context(), req.Email, req.Password, req.AppId)
 	if err != nil {
 		h.log.Error("Login failed", sl.Err(err))
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -50,7 +51,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}

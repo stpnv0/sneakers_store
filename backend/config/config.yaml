@@ -22,7 +22,7 @@ database:
 # Настройки клиентов
 clients:
   sso:
-    address: "localhost:50051"  # Адрес SSO-сервиса (gRPC)
+    address: "localhost:44044"  # Адрес SSO-сервиса (gRPC)
     timeout: "5s"               # Таймаут запросов к SSO
     retriesCount: 3             # Количество ретраев к SSO
 
