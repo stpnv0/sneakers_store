@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"sneakers-store/db"
+	"sneakers-store/internal/auth"
+	ssogrpc "sneakers-store/internal/clients/sso/grpc"
 	"sneakers-store/internal/config"
 	"sneakers-store/internal/logger/handlers/slogpretty"
+	"sneakers-store/internal/logger/sl"
 	"sneakers-store/internal/sneakers"
 	"sneakers-store/router"
 )
@@ -19,19 +23,34 @@ func main() {
 
 	database, err := db.ConnectDB(cfg)
 	if err != nil {
-		log.Info("[ERROR] can't connect to database: %s", err)
+		log.Error("[ERROR] can't connect to database", sl.Err(err))
 	}
 	defer database.Close()
+
+	ssoClient, err := ssogrpc.New(
+		context.Background(),
+		log,
+		cfg.Clients.SSO.Address,
+		cfg.Clients.SSO.Timeout,
+		cfg.Clients.SSO.RetriesCount,
+	)
+	if err != nil {
+		log.Error("failed to init sso client", sl.Err(err))
+		os.Exit(1)
+	}
 
 	//Инициализация слоев
 	repo := sneakers.NewRepository(database)       // Репозиторий
 	service := sneakers.NewService(repo)           // Сервис
 	sneakerHandler := sneakers.NewHandler(service) // Хендлер
 
+	//Инициализация обработчика auth
+	authHandler := auth.New(ssoClient, log)
+
 	// Настройка роутера и запуск сервера
-	router.InitRouter(sneakerHandler)
+	router.InitRouter(sneakerHandler, authHandler)
 	if err := router.Start("0.0.0.0:8080"); err != nil {
-		log.Info("[ERROR] failed to start server: %s", err)
+		log.Error("[ERROR] failed to start server", sl.Err(err))
 	}
 }
 
