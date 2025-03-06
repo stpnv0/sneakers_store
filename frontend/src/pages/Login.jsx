@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from '../api/axios';
 import "../index.scss";
 
 const Login = () => {
@@ -22,37 +23,74 @@ const Login = () => {
     }
   };
   
+  const verifyToken = async (token) => {
+    try {
+      // Создаем новый экземпляр axios для тестового запроса
+      const testAxios = axios.create({
+        baseURL: 'http://localhost:8080',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      const response = await testAxios.get('/api/v1/favorites');
+      console.log('Verification response:', response);
+      return true;
+    } catch (error) {
+      console.error('Verification error:', error.response?.data);
+      return false;
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
   
-    const endpoint = isRegister 
-      ? "http://localhost:8080/api/v1/auth/register" 
-      : "http://localhost:8080/api/v1/auth/login";
+    const endpoint = isRegister ? "/api/v1/auth/register" : "/api/v1/auth/login";
   
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData), 
-      });
+      // Шаг 1: Авторизация
+      const response = await axios.post(endpoint, formData);
+      const data = response.data;
+      console.log('Auth response:', data);
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        const errorMessage = data?.message || "Ошибка запроса";
-        throw new Error(errorMessage);
-      }
-  
-      // Для входа сохраняем токен
       if (!isRegister) {
+        if (!data.token) {
+          throw new Error("Токен не получен от сервера");
+        }
+        
+        // Шаг 2: Сохраняем токен
         localStorage.setItem("token", data.token);
+        console.log('Token saved:', data.token);
+        
+        // Шаг 3: Проверяем сохранение
+        const savedToken = localStorage.getItem("token");
+        if (savedToken !== data.token) {
+          throw new Error("Ошибка сохранения токена");
+        }
+        
+        // Шаг 4: Проверяем токен
+        const isValid = await verifyToken(savedToken);
+        if (!isValid) {
+          throw new Error("Ошибка проверки токена");
+        }
+        
+        console.log('Token verification successful');
       }
       
+      // Шаг 5: Завершаем процесс
       alert(isRegister ? "Регистрация успешна!" : "Вход выполнен!");
-      navigate("/");
+      
+      // Принудительно обновляем страницу для сброса состояния приложения
+      window.location.href = '/';
     } catch (err) {
-      setError(err.message);
+      console.error('Auth error:', err);
+      const errorMessage = err.response?.data?.message || err.message || "Ошибка запроса";
+      console.error('Error details:', errorMessage);
+      setError(errorMessage);
+      localStorage.removeItem("token");
     }
   };
 

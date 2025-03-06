@@ -4,13 +4,13 @@ import axios from 'axios'
 import {Header} from './components/Header'
 import {Drawer} from './components/Drawer'
 import Home from './pages/Home'
-import Favorites from './pages/Favorites'
+import { Favourites } from './pages/Favourites'
 import Login from './pages/Login'
+import { FavoritesProvider } from './context/FavoritesContext'
 
 export const App = () => {
   const [items, setItems] = useState([]);
   const [cartItems, setCartItems] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [cartOpened, setCartOpened] = useState(false);
 
@@ -25,11 +25,19 @@ export const App = () => {
           credentials: 'include'
         });
         
-        const items = await itemsResponse.json();
-        setItems(items);
-        
+        const data = await itemsResponse.json();
+        console.log('Fetched items:', data);
+        if (Array.isArray(data)) {
+          setItems(data);
+        } else if (data && Array.isArray(data.items)) {
+          setItems(data.items);
+        } else {
+          console.error('Unexpected items response format:', data);
+          setItems([]);
+        }
       } catch (error) {
         console.error('Ошибка при получении данных:', error);
+        setItems([]);
       }
     }
     
@@ -42,55 +50,46 @@ export const App = () => {
       .then((res) => setCartItems((state) => [...state, res.data]));
   }
   const onRemoveItem = (id) => {
-    axios.delete(`https://643ecf80c72fda4a0b01bac3.mockapi.io/cart/${id }`)
-    setCartItems(prev => prev.filter((item) => item.id!== id))
+    axios.delete(`https://643ecf80c72fda4a0b01bac3.mockapi.io/cart/${id}`)
+    setCartItems(prev => prev.filter((item) => item.id !== id))
   }
-  const onAddToFavorite = (obj) => {
-    axios.setFavorites((prev) => [...prev, obj]);
-  }
- 
 
   const onChangeSearchInput = (event) => {
     setSearchValue(event.target.value); 
   }
 
   return (
-  <div className='wrapper'>
-    {cartOpened && (
-      <Drawer 
-        onRemove={onRemoveItem}
-        items ={cartItems} 
-        onClose={() => setCartOpened(false)}
-      />
-    )}
-    <Header onClickCart={() => setCartOpened(true)}/>
-    <Routes>
-      <Route path="/" 
-        element={
-          <Home
-            items={items} 
-            searchValue={searchValue} 
-            setSearchValue={setSearchValue} 
-            onChangeSearchInput={onChangeSearchInput}
-            onAddToFavorite={onAddToFavorite} 
-            onAddToCart={onAddToCart}
+    <FavoritesProvider>
+      <div className='wrapper'>
+        {cartOpened && (
+          <Drawer 
+            onRemove={onRemoveItem}
+            items={cartItems} 
+            onClose={() => setCartOpened(false)}
           />
-        }            
-      />
-      <Route path='/favorites' 
-        element={
-          <Favorites  
-            items={favorites}
-            onAddToFavorite={onAddToFavorite}
+        )}
+        <Header onClickCart={() => setCartOpened(true)}/>
+        <Routes>
+          <Route path="/" 
+            element={
+              <Home
+                items={items} 
+                searchValue={searchValue} 
+                setSearchValue={setSearchValue} 
+                onChangeSearchInput={onChangeSearchInput}
+                onAddToCart={onAddToCart}
+              />
+            }            
           />
-        }
-      />
-      <Route path="/login" 
-        element={<Login />} 
-      />
-    </Routes>
-  </div>
- 
+          <Route path='/favorites' 
+            element={<Favourites />}
+          />
+          <Route path="/login" 
+            element={<Login />} 
+          />
+        </Routes>
+      </div>
+    </FavoritesProvider>
   )
 }
 
