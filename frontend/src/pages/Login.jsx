@@ -3,6 +3,21 @@ import { useNavigate } from "react-router-dom";
 import axios from '../api/axios';
 import "../index.scss";
 
+// Функция для декодирования JWT токена (используется только внутри компонента)
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Error decoding JWT:', e);
+    return null;
+  }
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -25,7 +40,7 @@ const Login = () => {
   
   const verifyToken = async (token) => {
     try {
-      // Создаем новый экземпляр axios для тестового запроса
+      // Проверяем токен, делая запрос к защищенному эндпоинту
       const testAxios = axios.create({
         baseURL: 'http://localhost:8080',
         headers: {
@@ -35,11 +50,10 @@ const Login = () => {
         }
       });
 
-      const response = await testAxios.get('/api/v1/favorites');
-      console.log('Verification response:', response);
+      // Проверка доступа к избранным товарам
+      await testAxios.get('/api/v1/favorites');
       return true;
     } catch (error) {
-      console.error('Verification error:', error.response?.data);
       return false;
     }
   };
@@ -51,44 +65,40 @@ const Login = () => {
     const endpoint = isRegister ? "/api/v1/auth/register" : "/api/v1/auth/login";
   
     try {
-      // Шаг 1: Авторизация
+      // Выполняем запрос на авторизацию
       const response = await axios.post(endpoint, formData);
       const data = response.data;
-      console.log('Auth response:', data);
       
       if (!isRegister) {
         if (!data.token) {
           throw new Error("Токен не получен от сервера");
         }
         
-        // Шаг 2: Сохраняем токен
+        // Сохраняем токен
         localStorage.setItem("token", data.token);
-        console.log('Token saved:', data.token);
         
-        // Шаг 3: Проверяем сохранение
+        // Проверяем сохранение
         const savedToken = localStorage.getItem("token");
         if (savedToken !== data.token) {
           throw new Error("Ошибка сохранения токена");
         }
         
-        // Шаг 4: Проверяем токен
+        // Проверяем токен
         const isValid = await verifyToken(savedToken);
         if (!isValid) {
           throw new Error("Ошибка проверки токена");
         }
         
-        console.log('Token verification successful');
+        // Успешный вход
+        alert("Вход выполнен!");
+        window.location.href = '/';
+      } else {
+        // Успешная регистрация
+        alert("Регистрация успешна!");
+        setIsRegister(false); // Переключаем на форму входа
       }
-      
-      // Шаг 5: Завершаем процесс
-      alert(isRegister ? "Регистрация успешна!" : "Вход выполнен!");
-      
-      // Принудительно обновляем страницу для сброса состояния приложения
-      window.location.href = '/';
     } catch (err) {
-      console.error('Auth error:', err);
       const errorMessage = err.response?.data?.message || err.message || "Ошибка запроса";
-      console.error('Error details:', errorMessage);
       setError(errorMessage);
       localStorage.removeItem("token");
     }
