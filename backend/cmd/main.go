@@ -52,7 +52,7 @@ func main() {
 	authHandler := auth.New(ssoClient, log)
 
 	// Настройка роутера и запуск сервера
-	router.InitRouter(sneakerHandler, authHandler, favHandler)
+	router.InitRouter(sneakerHandler, authHandler, favHandler, cfg.AppSecret)
 	if err := router.Start("0.0.0.0:8080"); err != nil {
 		log.Error("[ERROR] failed to start server", sl.Err(err))
 	}
