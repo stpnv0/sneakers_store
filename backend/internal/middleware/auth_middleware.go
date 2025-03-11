@@ -10,7 +10,7 @@ import (
 )
 
 // AuthMiddleware проверяет JWT токен и устанавливает ID пользователя в контекст запроса
-func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
+func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Получение токена из заголовка Authorization
 		authHeader := c.GetHeader("Authorization")

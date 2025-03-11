@@ -11,5 +11,10 @@ COMMENT ON TABLE favorites IS 'Таблица избранных товаров 
 COMMENT ON COLUMN favorites.user_sso_id IS 'ID пользователя из системы SSO';
 COMMENT ON COLUMN favorites.sneaker_id IS 'ID кроссовка из таблицы sneakers';
 
--- Создаем индекс для быстрого поиска избранных товаров пользователя
-CREATE INDEX idx_favorites_user_sso_id ON favorites(user_sso_id);
+-- Создаем индекс для быстрого поиска избранных товаров пользователя, если он не существует
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_favorites_user_sso_id') THEN
+        CREATE INDEX idx_favorites_user_sso_id ON favorites(user_sso_id);
+    END IF;
+END $$;

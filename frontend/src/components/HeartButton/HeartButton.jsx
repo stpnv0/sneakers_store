@@ -9,21 +9,17 @@ export const HeartButton = memo(({ sneakerId }) => {
     return null;
   }
   
-  const { isFavorite, addToFavorites, removeFromFavorites } = useContext(FavoritesContext);
+  const { isFavorite, toggleFavorite } = useContext(FavoritesContext);
   const isLiked = isFavorite(sneakerId);
 
   const handleClick = useCallback(async (e) => {
     e.preventDefault(); // Предотвращаем всплытие события
     try {
-      if (isLiked) {
-        await removeFromFavorites(sneakerId);
-      } else {
-        await addToFavorites(sneakerId);
-      }
+      await toggleFavorite(sneakerId);
     } catch (error) {
       logger.error('Ошибка при изменении статуса избранного:', error);
     }
-  }, [isLiked, sneakerId, addToFavorites, removeFromFavorites]);
+  }, [sneakerId, toggleFavorite]);
 
   return (
     <button 
