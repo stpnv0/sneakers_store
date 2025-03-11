@@ -1,78 +1,80 @@
 import { useState, useEffect, useContext } from 'react';
 import { Card } from '../components/Card/Card';
 import { FavoritesContext } from '../context/FavoritesContext';
-import axios from '../api/axios';
+import { ItemsContext } from '../context/ItemsContext';
 import styles from './Favourites.module.scss';
 
 export const Favourites = () => {
-  const { favorites } = useContext(FavoritesContext);
+  const { favorites, loading: favoritesLoading, error: favoritesError } = useContext(FavoritesContext);
+  const { items, loading: itemsLoading } = useContext(ItemsContext);
   const [favoriteItems, setFavoriteItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchFavoriteItems = async () => {
-      if (!favorites || favorites.length === 0) {
-        setFavoriteItems([]);
-        setLoading(false);
-        return;
-      }
+    if (!favorites || !items || favorites.length === 0 || items.length === 0) {
+      setFavoriteItems([]);
+      return;
+    }
 
-      try {
-        const response = await axios.get('/api/v1/items');
-        const allItems = response.data;
-        console.log('All items:', allItems);
-        console.log('Favorites:', favorites);
-        
-        // Убедимся, что allItems это массив
-        const itemsArray = Array.isArray(allItems) ? allItems : allItems.items || [];
-        
-        // Создаем Set из ID избранных товаров для быстрого поиска
-        const favoriteIds = new Set(favorites.map(fav => fav.sneaker_id));
-        
-        // Фильтруем все товары, оставляя только те, которые в избранном
-        const favoriteItems = itemsArray.filter(item => favoriteIds.has(item.id));
-        console.log('Filtered favorite items:', favoriteItems);
-        
-        setFavoriteItems(favoriteItems);
-      } catch (err) {
-        console.error('Error fetching favorite items:', err);
-        setError('Не удалось загрузить избранные товары');
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      console.log('Избранное:', favorites);
+      console.log('Все товары:', items);
+      
+      // Создаем Set из ID избранных товаров для быстрого поиска
+      const favoriteIds = new Set(favorites.map(fav => fav.sneaker_id));
+      
+      // Фильтруем все товары, оставляя только те, которые в избранном
+      const favoriteItems = items.filter(item => favoriteIds.has(item.id));
+      console.log('Отфильтрованные избранные товары:', favoriteItems);
+      
+      setFavoriteItems(favoriteItems);
+    } catch (err) {
+      console.error('Ошибка при обработке избранных товаров:', err);
+    }
+  }, [favorites, items]);
 
-    fetchFavoriteItems();
-  }, [favorites]);
+  const loading = favoritesLoading || itemsLoading;
+  const error = favoritesError;
 
   if (loading) {
-    return <div>Загрузка...</div>;
+    return (
+      <div className={styles.favorites}>
+        <h1>Мои закладки</h1>
+        <div className={styles.loading}>Загрузка...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Ошибка: {error}</div>;
-  }
-
-  if (!favoriteItems || favoriteItems.length === 0) {
-    return <div>У вас пока нет избранных товаров</div>;
+    return (
+      <div className={styles.favorites}>
+        <h1>Мои закладки</h1>
+        <div className={styles.error}>Ошибка: {error}</div>
+      </div>
+    );
   }
 
   return (
     <div className={styles.favorites}>
       <h1>Мои закладки</h1>
-      <div className={styles.sneakers}>
-        {favoriteItems.map((item) => (
-          <Card 
-            key={item.id}
-            id={item.id}
-            title={item.title}
-            description={item.description}
-            price={item.price}
-            imgUrl={item.imageUrl}
-          />
-        ))}
-      </div>
+      {favoriteItems.length > 0 ? (
+        <div className={styles.sneakers}>
+          {favoriteItems.map((item) => (
+            <Card 
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              description={item.description}
+              price={item.price}
+              imgUrl={item.imageUrl}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.empty}>
+          <p>У вас пока нет избранных товаров</p>
+          <p>Добавьте товары в избранное, нажав на сердечко на карточке товара</p>
+        </div>
+      )}
     </div>
   );
 }; 

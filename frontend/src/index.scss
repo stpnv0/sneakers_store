@@ -57,12 +57,50 @@ margin: 50px auto;
   .headerRight {
     display: flex;
     align-items: center;
-    img {
-      cursor: pointer;
-    }
-    span {
-      
+    
+    li {
+      display: flex;
+      align-items: center;
       margin-right: 30px;
+      
+      &:last-child {
+        margin-right: 0;
+      }
+      
+      img {
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      
+      span {
+        font-weight: 600;
+        font-size: 14px;
+        transition: color 0.2s ease;
+      }
+      
+      &:first-child {
+        cursor: pointer;
+        
+        &:hover {
+          span {
+            color: #9DD458;
+          }
+          
+          img {
+            filter: brightness(0) saturate(100%) invert(73%) sepia(11%) saturate(1728%) hue-rotate(52deg) brightness(95%) contrast(89%);
+          }
+        }
+      }
+      
+      &:nth-child(2) {
+        cursor: pointer;
+        
+        &:hover {
+          img {
+            filter: brightness(0) saturate(100%) invert(11%) sepia(83%) saturate(6418%) hue-rotate(359deg) brightness(100%) contrast(113%);
+          }
+        }
+      }
     }
   }
 }
@@ -76,48 +114,65 @@ li {
 }
 
 .content {
-  .string {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 40px;
-  margin-bottom: 40px;
-  }
-  h1{
-    margin: 0;
-    
-  }
-}
 
-.searchBlock {
-  border: 1px solid #f3f3f3;
-  display: flex;
-  border-radius: 10px;
-  padding: 0 15px;
-  position: relative;
+  .contentHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
 
-  .btnRemove {
-    position: absolute;
-    right: 15px;
-    width: 18px;
-    height: 18px;
-    top: 15px;
-    cursor: pointer;
+    h1 {
+      margin: 0;
+    }
   }
 
-  input {
-    border: 0;
-    padding: 13px;
-    font-size: 16px;
-    width: 200px;
+  .search-block {
+    border: 1px solid #f3f3f3;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    padding: 0 15px;
+    position: relative;
+
+    input {
+      border: 0;
+      padding: 13px;
+      font-size: 16px;
+      width: 200px;
+    }
+
+    img {
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
+    }
   }
 }
 
 .sneakers {
-  display: flex;
-  margin-left: 40px;
-  flex-wrap: wrap;
-  
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  padding: 0 20px;
+}
+
+@media (max-width: 1080px) {
+  .sneakers {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sneakers {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .sneakers {
+    grid-template-columns: 1fr;
+  }
 }
 
 .reg_vhod {
@@ -171,50 +226,95 @@ li {
   }
 }
 
-
-
-
 .cartItem {
   border: 1px solid #f3f3f3;
   border-radius: 20px;
   overflow: hidden;
-  display: flex ;
+  display: flex;
   align-items: center;
-  padding: 10px;
-   margin-bottom: 20px;
-
- 
-  img {
-    margin-right: 20px;
-    margin-bottom: 20px;
-  }
-  .cartItemImg {
-    height: 70px;
-    width: 8 0px;
-  }
-  .btnRemove {
-    margin-top: 15px;
-     opacity: 0.5 ;
-     transition: opacity  0.15s ease-in-out;
-     cursor: pointer;
-
-     &:hover {
-      opacity: 1;
-     }
-  }
-}
-.description {
-  margin-right: 20px;
+  padding: 20px;
   margin-bottom: 20px;
-  p {
-    font-size: 16px ;
+
+  .cartItemImg {
+    width: 70px;
+    height: 70px;
+    margin-right: 20px;
+    object-fit: contain;
   }
 
-  b {
-    font-size: 14px;
+  .description {
+    flex: 1;
+    margin-right: 20px;
+
+    p {
+      font-size: 16px;
+      margin: 0 0 5px;
+    }
+
+    b {
+      font-size: 14px;
+      display: block;
+      margin-bottom: 10px;
+    }
   }
-  
+
+  .removeBtn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.15s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .cartItemQuantity {
+    margin-top: 10px;
+
+    .quantityControl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      button {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #F2F2F2;
+        background: #FFFFFF;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          background: #F8F8F8;
+        }
+
+        &:active {
+          background: #F2F2F2;
+        }
+      }
+
+      span {
+        font-size: 14px;
+        min-width: 20px;
+        text-align: center;
+      }
+    }
+  }
 }
+
 .cartTotalBlock{
   ul {
     margin-bottom: 40px;
@@ -255,46 +355,54 @@ li {
 .emptyCart {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  flex: 1;
+  justify-content: center;
   text-align: center;
-
-  .greenBtn {
-    position: relative;
-    width: 245px;
- 
-
-    &:hover {
-      img {
-        transform: scale(-1) translateX(5px);
-      }
-    }
-    img {
-      position: absolute;
-      left: 30px;
-      top: 20px;
-      transition: transform 0.3s;
-    }
-  }
+  height: 100%;
+  padding: 20px;
+  
   img {
-    transform: scale(-1,1);
-    position: relative;
-    margin-right: 15px;
-    top: 1px;
-    transition: transform 0.15s ease-in-out;
+    opacity: 0.8;
+    margin-bottom: 10px;
+    filter: grayscale(0.3);
   }
-   h2 {
-    justify-content: center;
+  
+  h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 22px;
     font-weight: 600;
-    font-size: 22px;  
-   }
-   p {
-    width: 340px;
-    line-height: 24px;
-    opacity: 0.4;
+    color: #444;
+  }
+  
+  p {
+    color: #999;
+    font-size: 16px;
+    margin-bottom: 40px;
+    line-height: 1.5;
+    max-width: 300px;
+  }
+  
+  .greenBtn {
+    margin-top: 20px;
+    width: 245px;
+    transition: all 0.3s ease;
+    
+    .rotateArrow {
+      transform: rotate(180deg);
+      margin-right: 15px;
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover .rotateArrow {
+      transform: rotate(180deg) translateX(-5px);
+    }
+  }
+}
 
-   }
+.rotateArrow {
+  transform: rotate(180deg);
+  margin-right: 15px;
 }
 
 .greenBtn {
@@ -317,4 +425,24 @@ li {
     background-color: lighten($color: #9DD458, $amount: 10%);
   }
 
+}
+
+// Анимация для изменения цены
+@keyframes price-highlight {
+  0% {
+    color: inherit;
+    transform: scale(1);
+  }
+  50% {
+    color: #9DD458;
+    transform: scale(1.2);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+.price-changed {
+  animation: price-highlight 0.3s ease;
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"sneakers-store/db"
 	"sneakers-store/internal/auth"
+	"sneakers-store/internal/cart"
 	ssogrpc "sneakers-store/internal/clients/sso/grpc"
 	"sneakers-store/internal/config"
 	"sneakers-store/internal/favourites"
@@ -48,11 +49,14 @@ func main() {
 	repos := favourites.NewRepository(database)
 	favHandler := favourites.NewHandler(repos)
 
+	repositoryOfCart := cart.NewRepository(database)
+	cartHandler := cart.NewHandler(repositoryOfCart)
+
 	//Инициализация обработчика auth
 	authHandler := auth.New(ssoClient, log)
 
 	// Настройка роутера и запуск сервера
-	router.InitRouter(sneakerHandler, authHandler, favHandler, cfg.AppSecret)
+	router.InitRouter(sneakerHandler, authHandler, favHandler, cartHandler)
 	if err := router.Start("0.0.0.0:8080"); err != nil {
 		log.Error("[ERROR] failed to start server", sl.Err(err))
 	}

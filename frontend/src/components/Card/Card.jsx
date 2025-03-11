@@ -1,14 +1,28 @@
 import styles from "./styles.module.scss"
-import { useState, memo } from 'react';
+import { memo, useContext } from 'react';
 import { HeartButton } from '../HeartButton/HeartButton';
+import { CartContext } from '../../context/CartContext';
 import { logger } from '../../utils/logger';
 
-export const Card = memo(({ id, title, description, imgUrl, price, onPlus }) => {
-  const [isAdded, setIsAdded] = useState(false);
+export const Card = memo(({ id, title, description, imgUrl, price }) => {
+  const { isInCart, addToCart, decreaseQuantity, getQuantity } = useContext(CartContext);
+  const inCart = isInCart(id);
+  const quantity = getQuantity(id);
 
-  const handlePlusClick = () => {
-    onPlus?.({ id, title, imgUrl, price });
-    setIsAdded(!isAdded);
+  const handlePlusClick = async () => {
+    try {
+      await addToCart(id);
+    } catch (error) {
+      logger.error('Ошибка при добавлении в корзину', { error });
+    }
+  };
+
+  const handleMinusClick = async () => {
+    try {
+      await decreaseQuantity(id);
+    } catch (error) {
+      logger.error('Ошибка при уменьшении количества', { error });
+    }
   };
 
   const handleImageError = (e) => {
@@ -34,12 +48,34 @@ export const Card = memo(({ id, title, description, imgUrl, price, onPlus }) => 
           <span>Цена:</span>
           <b>{price} руб.</b>
         </div>
-        <img
-          className={styles.btn}
-          onClick={handlePlusClick}
-          src={isAdded ? '/img/checked.svg' : '/img/plus.svg'}
-          alt="Plus"
-        />
+        <div className={styles.addButton}>
+          {inCart ? (
+            <>
+              <button 
+                className={styles.quantityBtn} 
+                onClick={handleMinusClick}
+                aria-label="Уменьшить количество"
+              >
+                –
+              </button>
+              <span className={styles.quantityBadge}>{quantity}</span>
+              <button 
+                className={styles.quantityBtn} 
+                onClick={handlePlusClick}
+                aria-label="Увеличить количество"
+              >
+                +
+              </button>
+            </>
+          ) : (
+            <img
+              className={styles.btn}
+              onClick={handlePlusClick}
+              src="/img/plus.svg"
+              alt="Добавить в корзину"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

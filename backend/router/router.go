@@ -2,6 +2,7 @@ package router
 
 import (
 	"sneakers-store/internal/auth"
+	"sneakers-store/internal/cart"
 	"sneakers-store/internal/favourites"
 	"sneakers-store/internal/middleware"
 	"sneakers-store/internal/sneakers"
@@ -13,7 +14,7 @@ import (
 
 var r *gin.Engine
 
-func InitRouter(sneakerHandler *sneakers.Handler, authHandler *auth.Handler, favHandler *favourites.Handler, appSecret string) {
+func InitRouter(sneakerHandler *sneakers.Handler, authHandler *auth.Handler, favHandler *favourites.Handler, cartHandler *cart.Handler) {
 	r = gin.Default()
 
 	// CORS настройки
@@ -50,7 +51,7 @@ func InitRouter(sneakerHandler *sneakers.Handler, authHandler *auth.Handler, fav
 
 		// Избранное (с middleware аутентификации)
 		favGroup := api.Group("/favorites")
-		favGroup.Use(middleware.AuthMiddleware(appSecret))
+		favGroup.Use(middleware.AuthMiddleware())
 		{
 			favGroup.POST("", favHandler.AddFavorite)
 			favGroup.GET("", favHandler.GetFavorites)
@@ -59,16 +60,12 @@ func InitRouter(sneakerHandler *sneakers.Handler, authHandler *auth.Handler, fav
 
 		// Корзина
 		cartGroup := api.Group("/cart")
+		cartGroup.Use(middleware.AuthMiddleware())
 		{
-			cartGroup.GET("", func(ctx *gin.Context) {
-				ctx.JSON(200, gin.H{"message": "GET /cart not implemented yet"})
-			})
-			cartGroup.POST("", func(ctx *gin.Context) {
-				ctx.JSON(200, gin.H{"message": "POST /cart not implemented yet"})
-			})
-			cartGroup.DELETE("/:id", func(ctx *gin.Context) {
-				ctx.JSON(200, gin.H{"message": "DELETE /cart not implemented yet"})
-			})
+			cartGroup.POST("", cartHandler.AddToCart)
+			cartGroup.GET("", cartHandler.GetAllCart)
+			cartGroup.PUT("/:id", cartHandler.UpdateCartItemQuantity)
+			cartGroup.DELETE("/:id", cartHandler.DeleteFromCart)
 		}
 	}
 }
